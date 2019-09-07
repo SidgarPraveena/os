@@ -1,0 +1,22 @@
+hello
+a.out
+os_asmnt_1
+os_one.cpp
+samplePipe.cpp
+sampleTermios.cpp
+text.txt
+trie.cpp
+trie.h
+total 124
+drwxr-xr-x  3 praveena praveena  4096 Sep  7 19:32 .
+drwxr-xr-x 21 praveena praveena  4096 Sep  7 09:53 ..
+-rwxr-xr-x  1 praveena praveena 73296 Sep  7 19:32 a.out
+-rw-r--r--  1 praveena praveena  3771 Sep  4 04:12 .bash_rc_duplicate
+-rw-r--r--  1 praveena praveena   497 Sep  7 10:11 check.h
+drwxr-xr-x  3 praveena praveena  4096 Sep  3 23:25 os_asmnt_1
+-rw-r--r--  1 praveena praveena  1354 Sep  5 01:45 os_one.cpp
+-rw-r--r--  1 praveena praveena  7005 Sep  7 09:43 samplePipe.cpp
+-rw-r--r--  1 praveena praveena  5249 Sep  7 19:31 sampleTermios.cpp
+-rw-r--r--  1 praveena praveena    92 Sep  7 10:06 text.txt
+-rw-rw-r--  1 praveena praveena  1957 Sep  7 03:53 trie.cpp
+-rw-r--r--  1 praveena praveena  1732 Sep  7 10:10 trie.h
