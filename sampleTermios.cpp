@@ -15,10 +15,11 @@
 #include <sys/utsname.h>
 #include<vector>
 #include<map>
-
+#include<fstream>
 
 using namespace std;
 vector<char> store;
+vector<string> vec;
 
 struct Trie
 {
@@ -143,30 +144,7 @@ void parse(char *arr, char ** argv)
 		tok=strtok(NULL," ");
 		argv[i]=NULL;
 	}
-	/*for(int j=0;j<i;j++)
-	{
-		argv[j]=array[j];
-		argv[i]=NULL;
-	}*/
 }	
-/*void parse(char *arr, char ** argv)
-{
-	int i=0;
-	char * tok;
-	char *array[500];
-	tok=strtok(arr," ");
-	while(tok!=NULL)
-	{
-		array[i++]=strdup(tok);
-		tok=strtok(NULL," ");
-	}
-	for(int j=0;j<i;j++)
-	{
-		argv[j]=array[j];
-		argv[i]=NULL;
-	}
-}*/
-
 void sinRed(char * arr, char ** argv)
 {
 	int i=0;
@@ -317,16 +295,15 @@ void trim(char arr[500],int cas)
 int main()
 {
 
-	int c,res,res1;
+	int c,res,res1,d;
 	char temp;
 	char arr[500],b[500];
 	char *argv[500],*argv1[500],*argv2[500],*argv3[500],*argv4[500],*argv5[500],*argv6[500];
 	map <vector <char>, vector <char> > al;
 	vector<char> m;
 	vector<char> n;
-	//char fileHist[15]="history.txt";
-	//int lm=open(fileHist ,O_RDONLY | O_WRONLY | O_TRUNC );
-	//cout<<lm;
+	ofstream outFile;
+	outFile.open("/home/praveena/assignments/history.txt");
 	pid_t pid;
 	Trie* root = nullptr,*pt=nullptr;
 	
@@ -357,9 +334,9 @@ int main()
 				arr[i]='\0';
 				
 			}
-			/*else if(c=='A')
+			else if(c==65 || c==66)
 			{
-				//cout<<"up arrow";
+				
 				cout<<"\b";
 				cout<<" ";
 				cout<<"\b";
@@ -372,7 +349,8 @@ int main()
 				cout<<"\b";
 				cout<<" ";
 				cout<<"\b";
-			}*/
+				break;
+			}
 			else
 			{
 				temp=(char)c;
@@ -381,7 +359,6 @@ int main()
 			}
 		}
 		arr[i]='\0';
-		//cout<<"arr "<<arr<<endl;
 		if(c==9)
 		{
 			root=nullptr;
@@ -392,7 +369,6 @@ int main()
   			int len = strlen(buff);
 			if(buff[len] != '/' && (opendir(buff) != NULL))
 				strcat(buff, "/");
-  			//cout<<buff<<endl;
   			
   			struct dirent *ptr;
     			DIR *main;
@@ -409,13 +385,86 @@ int main()
 			cout<<endl;
     			traverse(&pt,arr);
 		}
-		else if(c==10)
+		if(c==65 || c==66)
 		{
+			ifstream in;
+			string line;
+			in.open("/home/praveena/assignments/history.txt");
+			while(!in.eof())
+			{
+				getline(in,line);
+				vec.push_back(line);
+			}
+			int i,te;
+			i=vec.size()-1;
+			d=c;
+			int sz,lg=4;
+			do
+			{	
+				if(d==65)
+				{
+					for(int sh=0;sh<lg;sh++)
+					{
+						cout<<"\b";
+						cout<<" ";
+						cout<<"\b";
+					}
+					cout<<"$: "<<vec[i];
+					lg=vec[i].size();
+					lg=lg+7;
+					sz=vec.size();
+					i--;
+					if(i<0)
+						i++;
+				}
+				if(d==66)
+				{
+					for(int sh=0;sh<lg;sh++)
+					{
+						cout<<"\b";
+						cout<<" ";
+						cout<<"\b";
+					}
+					cout<<"$: "<<vec[i];
+					lg=vec[i].size();
+					lg=lg+7;
+					sz=vec.size();
+					i++;
+					if(i==sz-1)
+						i--;
+				}
+				if(d==127)
+				{
+					cout<<"\b";
+					cout<<" ";
+					cout<<"\b";
+					cout<<"\b";
+					cout<<" ";
+					cout<<"\b";
+					cout<<"\b";
+					cout<<" ";
+					cout<<"\b";
+				}
+				te=d;
+				d=getch();
+			}while(d!=10);
+			c=d;
+			if(te==65)
+				i++;
+			if(te==66)
+				i--;
+			for(int sh=0;sh<vec[i].size();sh++)
+			{
+				arr[sh]=vec[i][sh];
+			}
+		}
+		if(c==10)
+		{
+			outFile<<arr<<endl;//mandatory
 			res=checkPipe(arr);
 			if(res==0)
 			{
 				res1=check(arr);
-				cout<<"res 1"<<res1<<endl;
 				if(res1==1)
 				{
 					sinRed(arr,argv2);
@@ -449,7 +498,7 @@ int main()
 						fp=open(argv[1],O_WRONLY | O_APPEND );
 						if(fp==-1)
 						{
-							cout<<"Enter correct file name";
+							cout<<"Enter correct file name"<<endl;
 						}
 						else
 						{
