@@ -8,11 +8,116 @@
 #include <bits/stdc++.h>
 #include<sys/wait.h>
 #include <fcntl.h>
+#include <fstream>
+#include<string.h>
 #include <dirent.h>
-#include "trie.h"
-#include"check.h"
-using namespace std;
+#include <errno.h>
+#include <sys/utsname.h>
+#include<vector>
+#include<map>
 
+
+using namespace std;
+vector<char> store;
+
+struct Trie
+{
+	bool isEndOfWord;
+	unordered_map<char, Trie *>map;
+};
+Trie* getNewTrieNode() 
+{ 
+    Trie* node = new Trie; 
+    node->isEndOfWord = false; 
+    return node; 
+} 
+void insert(Trie**  root, const string& str) 
+{ 
+    if (*root == nullptr) 
+        *root = getNewTrieNode(); 
+  
+    Trie* temp = *root; 
+    for (int i = 0; i < str.length(); i++) { 
+        char x = str[i]; 
+        if (temp->map.find(x) == temp->map.end()) 
+            temp->map[x] = getNewTrieNode(); 
+  
+        temp = temp->map[x]; 
+    } 
+  
+    temp->isEndOfWord = true; 
+} 
+
+
+void display(vector<char> store,char arr[5])
+{
+	cout<<arr;
+	for(auto i=store.begin(); i!=store.end();i++)
+	{
+		cout<<*i;
+	}
+	cout<<endl;
+}
+
+void traverse(Trie** root,char arr[5])
+{
+	Trie * temp,*temp1;
+	temp=(*root);
+		
+	if(temp == nullptr)
+	{
+		return;
+	}
+	else
+	{
+		if((temp->map.size())!=0)
+		{
+			for (auto it = temp->map.cbegin(); it != temp->map.cend(); ++it) 
+			{
+				char z=(*it).first;
+				store.push_back(z);
+				temp1=temp->map[z];
+				if(temp1->isEndOfWord == true)
+				{
+					display(store,arr);
+				}
+				traverse(&(temp->map[z]),arr);
+				store.pop_back();
+			}
+		}
+	}
+}
+void init(Trie ** root)
+{
+	insert(root, "abc"); 
+    	insert(root, "abcd"); 
+	insert(root, "abgl"); 
+	insert(root, "cdf"); 
+    	insert(root,"lmn");
+    	insert(root, "abcde"); 
+}
+struct Trie * search(char arr[5],Trie *root)
+{
+	Trie * temp=root;
+	
+	
+	for(int i=0;i<strlen(arr);i++)
+	{
+		if(temp->map.find(arr[i])==temp->map.end())
+		{
+			return nullptr;
+		}
+		else
+		{
+			temp=temp->map[arr[i]];
+		}
+	}
+	if(temp->isEndOfWord==true)
+	{
+		cout<<arr<<"\t";
+	}
+	return temp;
+}
 
 int getch(void)
 {
@@ -25,8 +130,26 @@ int getch(void)
     ch = getchar();
     tcsetattr( 0, TCSANOW, &oldattr );
     return ch;
-}	
+}
 void parse(char *arr, char ** argv)
+{
+	int i=0;
+	char * tok;
+	char *array[500];
+	tok=strtok(arr," ");
+	while(tok!=NULL)
+	{
+		argv[i++]=strdup(tok);
+		tok=strtok(NULL," ");
+		argv[i]=NULL;
+	}
+	/*for(int j=0;j<i;j++)
+	{
+		argv[j]=array[j];
+		argv[i]=NULL;
+	}*/
+}	
+/*void parse(char *arr, char ** argv)
 {
 	int i=0;
 	char * tok;
@@ -42,7 +165,7 @@ void parse(char *arr, char ** argv)
 		argv[j]=array[j];
 		argv[i]=NULL;
 	}
-}
+}*/
 
 void sinRed(char * arr, char ** argv)
 {
@@ -78,6 +201,54 @@ void dobRed(char * arr,char ** argv)
 		argv[i]=NULL;
 	}
 }
+int checkPipe(char * arr)
+{
+	int count=0;
+	for(int i=0;i<strlen(arr);i++)
+	{
+		if(arr[i]=='|')
+			count++;
+	}
+	return count;
+}
+int check(char *arr)
+{
+	//cout<<"Hello"<<arr<<endl;
+	if(arr[0]=='$' && arr[1]=='\0')
+		return 6;
+	if(arr[0]=='a' && arr[1]=='l' && arr[2]=='i' && arr[3]=='a' && arr[4]=='s')
+		return 5;
+	if(arr[0]=='c' && arr[1]=='d' && arr[2]==' ' && arr[3]=='~' && arr[4]==' ')
+		return 4;
+	if(arr[0]=='c' && arr[1]=='d' && arr[2]==' ' && arr[3]=='~' && arr[4]!=' ')
+		return 7;
+	if(arr[0]=='c' && arr[1]=='d')
+		return 3;
+	if(arr[0]=='e' && arr[1]=='c' && arr[2]=='h' && arr[3]=='o' && arr[4]==' ' && arr[5]=='$'&&arr[6]=='P' && arr[7]=='A' && arr[8]=='T' && arr[9]=='H' && arr[10]=='\0')
+		return 8;
+	if(arr[0]=='e' && arr[1]=='c' && arr[2]=='h' && arr[3]=='o' && arr[4]==' ' && arr[5]=='$'&&arr[6]=='H' && arr[7]=='O' && arr[8]=='M' && arr[9]=='E' && arr[10]=='\0')
+		return 9;
+	if(arr[0]=='e' && arr[1]=='c' && arr[2]=='h' && arr[3]=='o' && arr[4]==' ' && arr[5]=='$'&&arr[6]=='U' && arr[7]=='S' && arr[8]=='E' && arr[9]=='R' && arr[10]=='\0')
+		return 10;
+	if(arr[0]=='e' && arr[1]=='c' && arr[2]=='h' && arr[3]=='o' && arr[4]==' ' && arr[5]=='$'&&arr[6]=='H' && arr[7]=='O' && arr[8]=='S' && arr[9]=='T')
+		return 11;
+	
+	for(int i=0;i<strlen(arr);i++)
+	{
+		if(arr[i]=='>')
+		{
+			if(arr[i+1]=='>')
+			{
+				return 2;
+			}
+			else 
+			{
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
 void pipTok(char * arr, char **argv)
 {
 	int i=0;
@@ -96,27 +267,51 @@ void pipTok(char * arr, char **argv)
 	}
 }
 
-void trim(char arr[500])
+void trim(char arr[500],int cas)
 {
 	int k,temp=0;
-	
-	for(int i=0;i<strlen(arr);i++)
+	if(cas==1)
 	{
-		if(arr[i]==' ' && arr[i+1]!='\0')
+		for(int i=0;i<strlen(arr);i++)
 		{
-			k=i+1;
-			temp=1;
+			if(arr[i]==' ' && arr[i+1]!='\0')
+			{
+				k=i+1;
+				temp=1;
+			}
+		}
+		if(temp==1)
+		{
+			int j=0;
+			for(k;k<strlen(arr);k++)
+			{
+				arr[j]=arr[k];
+				j++;
+			}
+			arr[j]='\0';
 		}
 	}
-	if(temp==1)
+	else if(cas==2)
 	{
-		int j=0;
-		for(k;k<strlen(arr);k++)
+		temp=0;
+		for(int i=0;i<strlen(arr);i++)
 		{
-			arr[j]=arr[k];
-			j++;
+			if(arr[i]=='/')
+			{
+				temp=1;
+				k=i+1;
+			}
 		}
-		arr[j]='\0';
+		if(temp==1)
+		{
+			int j=0;
+			for(k;k<strlen(arr);k++)
+			{
+				arr[j]=arr[k];
+				j++;
+			}
+			arr[j]='\0';
+		}
 	}
 }
 int main()
@@ -126,11 +321,18 @@ int main()
 	char temp;
 	char arr[500],b[500];
 	char *argv[500],*argv1[500],*argv2[500],*argv3[500],*argv4[500],*argv5[500],*argv6[500];
+	map <vector <char>, vector <char> > al;
+	vector<char> m;
+	vector<char> n;
+	//char fileHist[15]="history.txt";
+	//int lm=open(fileHist ,O_RDONLY | O_WRONLY | O_TRUNC );
+	//cout<<lm;
 	pid_t pid;
 	Trie* root = nullptr,*pt=nullptr;
 	
 	while(1)
 	{
+		cout<<"$: ";
 		int i=0;
 		while(1)
 		{
@@ -142,7 +344,6 @@ int main()
 				break;
 			else if(c==127)
 			{
-				//cout<<"arr "<<arr<<endl;
 				cout<<"\b";
 				cout<<" ";
 				cout<<"\b";
@@ -156,7 +357,7 @@ int main()
 				arr[i]='\0';
 				
 			}
-			else if(c=='A')
+			/*else if(c=='A')
 			{
 				//cout<<"up arrow";
 				cout<<"\b";
@@ -171,7 +372,7 @@ int main()
 				cout<<"\b";
 				cout<<" ";
 				cout<<"\b";
-			}
+			}*/
 			else
 			{
 				temp=(char)c;
@@ -180,8 +381,7 @@ int main()
 			}
 		}
 		arr[i]='\0';
-		cout<<"arr "<<arr<<endl;
-		
+		//cout<<"arr "<<arr<<endl;
 		if(c==9)
 		{
 			root=nullptr;
@@ -204,7 +404,7 @@ int main()
     					insert(&root,ptr->d_name);
     				}
     			}
-  			trim(arr);
+  			trim(arr,1);
 			pt=search(arr,root);
 			cout<<endl;
     			traverse(&pt,arr);
@@ -215,13 +415,12 @@ int main()
 			if(res==0)
 			{
 				res1=check(arr);
+				cout<<"res 1"<<res1<<endl;
 				if(res1==1)
 				{
 					sinRed(arr,argv2);
 					parse(argv2[0],argv3);
 					int fp;
-					
-					
 					if(fork()==0)
 					{
 						
@@ -247,7 +446,6 @@ int main()
 					
 					if(fork()==0)
 					{
-						
 						fp=open(argv[1],O_WRONLY | O_APPEND );
 						if(fp==-1)
 						{
@@ -272,22 +470,111 @@ int main()
 				}
 				else if(res1==3)
 				{
-					trim(arr);
+					trim(arr,1);
 					chdir(arr);
-					//cout<<arr;
+				}
+				else if(res1==4)
+				{
+					chdir("/home/praveena");
+
+				}
+				else if(res1==5)
+				{
+					
+					int l=0,p;
+					for(p=6; p<strlen(arr);p++)
+					{
+						if(arr[p]!='=')
+						{
+							m.push_back(arr[p]);
+						}
+						else 
+						{
+							break;
+						}
+					}
+					p=p+1;
+					l=0;
+					for(p;p<strlen(arr);p++)
+					{
+						n.push_back(arr[p]);
+					}
+					al[m]=n;
+					m.clear();
+					n.clear();
+				}
+				else if(res1==6)
+				{
+					cout<<getpid()<<endl;	
+				}
+				else if(res1==7)
+				{
+					chdir("/home/praveena");
+					int length=strlen(arr);
+					trim(arr,2);
+					chdir(arr);
+					
+				}
+				else if(res1==8)
+				{
+					string line;
+					ifstream inFile;
+					inFile.open("/etc/environment");
+					getline(inFile,line);
+					for(int p=6;p<line.size();p++)
+					{
+						cout<<line[p];
+					}
+					cout<<endl;
+				}
+				else if(res1==9)
+				{
+					cout<<"/home/praveena"<<endl;
+				}
+				else if(res1==10)
+				{
+					cout<<"Praveena"<<endl;
+				}
+				else if(res1==11)
+				{
+					string line;
+					ifstream inFile;
+					inFile.open("/etc/hostname");
+					getline(inFile,line);
+					for(int p=6;p<line.size();p++)
+					{
+						cout<<line[p];
+					}
+					cout<<endl;
 				}
 				else
 				{
 					strcpy(b,arr);
-					//cout<<b<<endl;
+					vector<char> zu,zp;
+					map<vector <char>,vector<char>>::iterator it;
+					for(int p=0;p<strlen(b);p++)
+					{
+						zu.push_back(b[p]);
+					}
+					it=al.find(zu);
+					
+					if (al.find(zu) != al.end()) 
+            				{
+            					zp=al[zu];
+            					int p=0;
+            					for (auto itz = zp.begin(); itz != zp.end(); itz++) 
+            					{
+        						b[p]=(*itz);
+        						p++;
+        					}
+            				}
 					parse(b, argv);
 					if(fork()==0)
 					{
 						if((execvp(argv[0],argv))==-1)  //3
 						{
-							cout<<"Enter correct command";
-						}
-						
+							cout<<"Enter correct command"<<endl;
+						}	
 						exit(0);
 					}
 					else
