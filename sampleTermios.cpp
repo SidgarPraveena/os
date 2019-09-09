@@ -16,7 +16,7 @@
 #include<vector>
 #include<map>
 #include<fstream>
-
+#include<signal.h>
 using namespace std;
 vector<char> store;
 vector<string> vec;
@@ -90,12 +90,13 @@ void traverse(Trie** root,char arr[5])
 }
 void init(Trie ** root)
 {
-	insert(root, "abc"); 
-    	insert(root, "abcd"); 
-	insert(root, "abgl"); 
-	insert(root, "cdf"); 
-    	insert(root,"lmn");
-    	insert(root, "abcde"); 
+	insert(root, "ls"); 
+    	insert(root, "ln"); 
+	insert(root, "kill"); 
+	insert(root, "dir"); 
+    	insert(root,"dif");
+    	insert(root, "cp"); 
+    	insert(root,"ps");
 }
 struct Trie * search(char arr[5],Trie *root)
 {
@@ -145,6 +146,27 @@ void parse(char *arr, char ** argv)
 		argv[i]=NULL;
 	}
 }	
+void pipTok(char * arr, char **argv)
+{
+	int i=0;
+	char * tok;
+	char *array[500];
+	tok=strtok(arr,"|");
+	while(tok!=NULL)
+	{
+		array[i++]=strdup(tok);
+		tok=strtok(NULL,"|");
+	}
+	for(int j=0;j<i;j++)
+	{
+		argv[j]=array[j];
+		argv[i]=NULL;
+	}
+	/*for(int j=0;j<i;j++)
+	{
+		cout<<"j "<<argv[j]<<" ";
+	}*/
+}
 void sinRed(char * arr, char ** argv)
 {
 	int i=0;
@@ -210,6 +232,8 @@ int check(char *arr)
 		return 10;
 	if(arr[0]=='e' && arr[1]=='c' && arr[2]=='h' && arr[3]=='o' && arr[4]==' ' && arr[5]=='$'&&arr[6]=='H' && arr[7]=='O' && arr[8]=='S' && arr[9]=='T')
 		return 11;
+	if(arr[0]=='e' && arr[1]=='x' && arr[2]=='i' && arr[3]=='t' )
+		exit(0);
 	
 	for(int i=0;i<strlen(arr);i++)
 	{
@@ -227,23 +251,7 @@ int check(char *arr)
 	}
 	return 0;
 }
-void pipTok(char * arr, char **argv)
-{
-	int i=0;
-	char * tok;
-	char *array[500];
-	tok=strtok(arr,"|");
-	while(tok!=NULL)
-	{
-		array[i++]=strdup(tok);
-		tok=strtok(NULL,"|");
-	}
-	for(int j=0;j<i;j++)
-	{
-		argv[j]=array[j];
-		argv[i]=NULL;
-	}
-}
+
 
 void trim(char arr[500],int cas)
 {
@@ -292,13 +300,18 @@ void trim(char arr[500],int cas)
 		}
 	}
 }
+void handleSignal(int signal_no)
+{
+	signal(SIGINT, handleSignal);
+	return;
+}
 int main()
 {
 
 	int c,res,res1,d;
 	char temp;
 	char arr[500],b[500];
-	char *argv[500],*argv1[500],*argv2[500],*argv3[500],*argv4[500],*argv5[500],*argv6[500];
+	char *argv[500],*argv1[500],*argv2[500],*argv3[500],*argv4[500],*argv5[500],*argv6[500],*argv7[500];
 	map <vector <char>, vector <char> > al;
 	vector<char> m;
 	vector<char> n;
@@ -306,10 +319,13 @@ int main()
 	outFile.open("/home/praveena/assignments/history.txt");
 	pid_t pid;
 	Trie* root = nullptr,*pt=nullptr;
-	
+	signal(SIGINT, handleSignal);
 	while(1)
 	{
-		cout<<"$: ";
+		if(getuid()!=0)
+			cout<<"$: ";
+		else 
+			cout<<"#: ";
 		int i=0;
 		while(1)
 		{
@@ -334,7 +350,7 @@ int main()
 				arr[i]='\0';
 				
 			}
-			else if(c==65 || c==66)
+			else if(((c==65 || c==66)&& arr[i-1]!='P')&& ((c==65 || c==66)&& arr[i-1]!='N'))
 			{
 				
 				cout<<"\b";
@@ -449,22 +465,26 @@ int main()
 				d=getch();
 			}while(d!=10);
 			c=d;
+			int sh;
 			if(te==65)
 				i++;
 			if(te==66)
 				i--;
-			for(int sh=0;sh<vec[i].size();sh++)
+			for(sh=0;sh<vec[i].size();sh++)
 			{
 				arr[sh]=vec[i][sh];
 			}
+			arr[sh]='\0';
 		}
 		if(c==10)
 		{
 			outFile<<arr<<endl;//mandatory
 			res=checkPipe(arr);
+			
 			if(res==0)
 			{
 				res1=check(arr);
+				//cout<<"res 1 : "<<res1<<endl;
 				if(res1==1)
 				{
 					sinRed(arr,argv2);
@@ -636,38 +656,48 @@ int main()
 			{
 				
 				/*pipTok(arr,argv4);
-				int pipFd[2];
+				int pipFd[2],pipFd1[2];
 				pipe(pipFd);
-				
+				pipe(pipFd1);
 				if(fork()==0)
 				{
 					
-					close(pipFd[0]);
-					dup2(pipFd[1],STDOUT_FILENO);
+					close(pipFd1[1]);
 					close(pipFd[1]);
+					dup2(pipFd1[0],0);
+					close(pipFd1[0]);
 					parse(argv4[0],argv5);
-					//cout<<argv4[0]<<" "<<argv4[1];
 					execvp(argv5[0],argv5);  //4
-					//exit(0);
+					exit(0);
 				}
 				else
 				{
-					
-					//cout<<"parent";
 					if(fork()==0)
 					{
 						close(pipFd[1]);
-						dup2(pipFd[0],STDIN_FILENO);
+						close(pipFd1[0]);
+						dup2(pipFd[0],0);
 						close(pipFd[0]);
+						dup2(pipFd1[1],1);
+						close(pipFd1[1]);
 						//cout<<argv4[1];
 						parse(argv4[1],argv6);
-						execvp(argv6[0],argv6);  //4
-						//exit(0);
+						execvp(argv6[0],argv6);  //4	
+						exit(0);
 					}
 					else
 					{
-						wait(NULL);
-						wait(NULL);
+						//wait(NULL);
+						//wait(NULL);
+						if(fork()==0)
+						{
+							close(pipFd[0]);
+							close(pipFd1[1]);
+							dup2(pipFd[1],1);
+							close(pipFd[1]);
+							parse(argv4[2],argv7);
+							execvp(argv7[0],argv7);
+						}
 					}
 					
 				}*/
@@ -675,7 +705,6 @@ int main()
 			}
 			
 		}
-		
 	}
 	
 	return 0;
